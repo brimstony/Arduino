@@ -14,13 +14,10 @@
 */
 
 #include <SPI.h>
-#include <Ethernet.h>
 #include <PubSubClient.h>
+#include <ESP8266WiFi.h>
 
-// Update these with values suitable for your network.
-byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
-IPAddress ip(172, 16, 0, 100);
-IPAddress server(192, 168, 1, 10);
+const char* mqtt_server = "192.168.1.10";
 
 void callback(char* topic, byte* payload, long unsigned int length) {
   Serial.print("Message arrived [");
@@ -32,24 +29,24 @@ void callback(char* topic, byte* payload, long unsigned int length) {
   Serial.println();
 }
 
-EthernetClient ethClient;
-PubSubClient client(ethClient);
+WiFiClient espClient;
+PubSubClient client(espClient);
 
 void reconnect() {
   // Loop until we're reconnected
   while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
+    Particle.publish("Attempting MQTT connection...");
     // Attempt to connect
     if (client.connect("arduinoClient")) {
-      Serial.println("connected");
+      Particle.publish("connected");
       // Once connected, publish an announcement...
       client.publish("test_topic","hello world");
       // ... and resubscribe
       client.subscribe("inTopic");
     } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
+      Particle.publish("failed, rc=");
+//      Particle.publish(client.state());
+      Particle.publish(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
     }
@@ -59,11 +56,11 @@ void reconnect() {
 void setup()
 {
   Serial.begin(57600);
-  Serial.println("setup");
-  client.setServer(server, 1883);
+  Particle.publish("setup");
+  client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
 
-  Ethernet.begin(mac, ip);
+  //Ethernet.begin(mac);
   // Allow the hardware to sort itself out
   delay(1500);
 }
