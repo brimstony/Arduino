@@ -20,13 +20,12 @@
 const char* mqtt_server = "192.168.1.10";
 
 void callback(char* topic, byte* payload, long unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
+  Particle.publish(topic);
+  char data[length];
   for (int i=0;i<length;i++) {
-    Serial.print((char)payload[i]);
+    data[i] = (char)payload[i];
   }
-  Serial.println();
+  Particle.publish("message", (char*)data);
 }
 
 WiFiClient espClient;
