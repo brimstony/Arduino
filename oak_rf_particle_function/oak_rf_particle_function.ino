@@ -34,58 +34,44 @@ unsigned long rc_codes[5][2] = {
 #define RC_PULSE_LENGTH 190 // 'Delay', if you got the right codes and this isn't working, check that the delay/pulse length from the sniffer matches this
 #define RC_BIT_LENGTH 24
 
-void callback(char* topic, byte* payload, long unsigned int length) {
-  triggerOutlet(3, outletOn);
-  outletOn = !outletOn;
-  //Particle.publish(outletOn);
-  char data[length];
-  for (int i=0;i<length;i++) {
-    data[i] = (char)payload[i];
-  }
-  Particle.publish("message", (char*)data);
-}
-
-void reconnect() {
-  // Loop until we're reconnected
-  while (!client.connected()) {
-    Particle.publish("Attempting MQTT connection...");
-    // Attempt to connect
-    if (client.connect("arduinoClient")) {
-      Particle.publish("connected");
-      // Once connected, publish an announcement...
-      client.publish("test_topic","hello world");
-      // ... and resubscribe
-      client.subscribe("inTopic");
-    } else {
-      Particle.publish("failed, rc=");
-//      Particle.publish(client.state());
-      Particle.publish(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
-  }
-}
-
+int livingRoomLights(String command);
+int upstairsLights(String command);
 
 void setup() {
-  Particle.publish("setup");
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
   sendSwitch.enableTransmit(RC_PIN_TX);
   sendSwitch.setProtocol(RC_PROTOCOL); // defaults to 1 anyway
   sendSwitch.setPulseLength(RC_PULSE_LENGTH); // this is critical
+
+  Particle.function("lrLights", livingRoomLights);
+  Particle.function("officeLights", upstairsLights);
 }
 
 void loop() {
 
-  /* Same switch as above, but using decimal code */
+}
 
-  if (!client.connected()) {
-    reconnect();
+int livingRoomLights(String command)
+{
+  triggerLights(command, 1);
+  return triggerLights(command, 2);
+}
+
+int upstairsLights(String command)
+{
+  return triggerLights(command, 3);
+}
+
+int triggerLights(String command, int outlet){
+    // look for the matching argument "coffee" <-- max of 64 characters long
+  if(command == "on")
+  {
+    triggerOutlet(outlet, true);
+    return 1;
+  } else if (command == "off"){
+    triggerOutlet(outlet, false);
+    return 1;
   }
-  client.loop();
-
-
+  else return -1;
 }
 
 void triggerOutlet(int outletNumber, bool turnOn) 

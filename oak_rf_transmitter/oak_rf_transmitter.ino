@@ -80,12 +80,10 @@ void loop() {
 
   /* Same switch as above, but using decimal code */
 
-  if (!client.connected()) {
-    reconnect();
-  }
-  client.loop();
 
-
+  triggerOutlet(3, outletOn);
+  outletOn = !outletOn;
+    delay(10000);
 }
 
 void triggerOutlet(int outletNumber, bool turnOn) 

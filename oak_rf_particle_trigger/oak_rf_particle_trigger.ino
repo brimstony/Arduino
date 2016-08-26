@@ -34,58 +34,30 @@ unsigned long rc_codes[5][2] = {
 #define RC_PULSE_LENGTH 190 // 'Delay', if you got the right codes and this isn't working, check that the delay/pulse length from the sniffer matches this
 #define RC_BIT_LENGTH 24
 
-void callback(char* topic, byte* payload, long unsigned int length) {
-  triggerOutlet(3, outletOn);
-  outletOn = !outletOn;
-  //Particle.publish(outletOn);
-  char data[length];
-  for (int i=0;i<length;i++) {
-    data[i] = (char)payload[i];
-  }
-  Particle.publish("message", (char*)data);
-}
-
-void reconnect() {
-  // Loop until we're reconnected
-  while (!client.connected()) {
-    Particle.publish("Attempting MQTT connection...");
-    // Attempt to connect
-    if (client.connect("arduinoClient")) {
-      Particle.publish("connected");
-      // Once connected, publish an announcement...
-      client.publish("test_topic","hello world");
-      // ... and resubscribe
-      client.subscribe("inTopic");
-    } else {
-      Particle.publish("failed, rc=");
-//      Particle.publish(client.state());
-      Particle.publish(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
-  }
-}
-
-
 void setup() {
-  Particle.publish("setup");
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  //client.setServer(mqtt_server, 1883);
+  //client.setCallback(callback);
   sendSwitch.enableTransmit(RC_PIN_TX);
   sendSwitch.setProtocol(RC_PROTOCOL); // defaults to 1 anyway
   sendSwitch.setPulseLength(RC_PULSE_LENGTH); // this is critical
+
+  Particle.subscribe("outlet_trigger", myHandler);
 }
 
 void loop() {
 
-  /* Same switch as above, but using decimal code */
+}
 
-  if (!client.connected()) {
-    reconnect();
+void myHandler(const char *event, const char *data)
+{
+
+
+  if (strcmp(data,"on")==0) {
+    triggerOutlet(3, true);
   }
-  client.loop();
-
-
+  else if (strcmp(data,"off")==0) {
+    triggerOutlet(3, false);
+  }
 }
 
 void triggerOutlet(int outletNumber, bool turnOn) 
