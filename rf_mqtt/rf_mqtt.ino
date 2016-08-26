@@ -28,14 +28,18 @@ unsigned long rc_codes[5][2] = {
 };
 
 // The physical Arduino PIN (this will be called with pinMode()). Change this according to your board layout
+<<<<<<< HEAD
 #define RC_PIN_TX 0
+=======
+#define RC_PIN_TX A0
+>>>>>>> origin/master
 
 #define RC_PROTOCOL 1
 #define RC_PULSE_LENGTH 190 // 'Delay', if you got the right codes and this isn't working, check that the delay/pulse length from the sniffer matches this
 #define RC_BIT_LENGTH 24
 
 void callback(char* topic, byte* payload, long unsigned int length) {
-  triggerOutlet(3, outletOn);
+  triggerOutlet(1, outletOn);
   outletOn = !outletOn;
   //Particle.publish(outletOn);
   char data[length];

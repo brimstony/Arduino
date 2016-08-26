@@ -13,7 +13,6 @@
  
 */
 
-#include <SPI.h>
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
 
@@ -59,8 +58,6 @@ void setup()
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
 
-  //Ethernet.begin(mac);
-  // Allow the hardware to sort itself out
   delay(1500);
 }
 
